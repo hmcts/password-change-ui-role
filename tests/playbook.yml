@@ -1,0 +1,28 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Install openssl
+      yum:
+        name: openssl
+        state: present
+    - name: Add test certificate
+      command: "openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout /hmcts.key -out /hmcts.crt -subj /CN=ldapstest.local -days 3650"
+      args:
+        creates: "/hmcts.*"
+    - name: slurp certificate
+      slurp:
+        src: /hmcts.crt
+      register: crtslurp
+    - name: slurp key
+      slurp:
+        src: /hmcts.key
+      register: keyslurp
+
+- hosts: all
+  gather_facts: true
+  vars:
+    password_change_crt: "{{ crtslurp['content'] | b64decode }}"
+    password_change_key: "{{ keyslurp['content'] | b64decode }}"
+  roles:
+    - password-change-ui-role

@@ -1,0 +1,5 @@
+Test:
+export http_proxy="http://reformmgmtproxyout.reform.hmcts.net:8080/"
+molecule test
+
+License: MIT

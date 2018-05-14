@@ -1,0 +1,7 @@
+---
+
+password_change_crt: "{{ lookup('hashi_vault', 'secret=secret/devops/ssl_crt_STAR_reform_hmcts_net:value') | replace('\\n', '\n') }}"
+password_change_key: "{{ lookup('hashi_vault', 'secret=secret/devops/ssl_key_STAR_reform_hmcts_net:value') | replace('\\n', '\n') }}"
+password_change_ui_apache_servername: my.password.changer.example.com
+password_change_ui_apache_serveralias:
+  - "aliased.password.changer.example.com"

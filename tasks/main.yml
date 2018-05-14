@@ -1,0 +1,55 @@
+---
+- name: "Install apache"
+  package:
+    state: "present"
+    name: "{{ item }}"
+  with_items:
+    - "httpd"
+    - "mod_ssl"
+    - "php"
+    - "php-ldap"
+  notify:
+    - "test apache config"
+    - "restart apache"
+
+- name: "Enable apache at startup"
+  service:
+    name: "httpd"
+    enabled: "yes"
+
+- name: "Copy password app files"
+  template:
+    src: var/www/password.reform/index.php.j2
+    dest: /var/www/password.reform/index.php
+
+- name: Copy in  certificate
+  copy:
+    content: "{{ password_change_crt }}"
+    dest: /etc/httpd/star.reform.hmcts.net.crt
+
+- name: Copy in key
+  copy:
+    content: "{{ password_change_key }}"
+    dest: /etc/httpd/star.reform.hmcts.net.key
+  no_log: true
+
+- name: "Template out apache config"
+  template:
+    src: password.reform.conf.j2
+    dest: /etc/httpd/conf.d/password.reform.conf
+  notify:
+    - "test apache config"
+    - "restart apache"
+
+- name: "Allow apache out to LDAPS (selinux)"
+  command: semanage boolean --modify --on httpd_can_connect_ldap
+  when: ansible_selinux is defined and ansible_selinux.status is defined and ansible_selinux.status == "enabled"
+
+- name: "Disable default apache vhost"
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^DocumentRoot'
+    state: absent
+  notify:
+    - "test apache config"
+    - "restart apache"

@@ -1,0 +1,13 @@
+---
+- name: "test apache config"
+  command: "apachectl configtest"
+  args:
+    warn: no
+  listen: "test apache config"
+
+- name: "restart apache"
+  service:
+    name: "httpd"
+    enabled: "yes"
+    state: "started"
+  listen: "restart apache"
